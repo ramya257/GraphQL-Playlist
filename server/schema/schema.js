@@ -10,9 +10,9 @@ const {GraphQLObjectType,GraphQLString,GraphQLSchema,GraphQLID,GraphQLInt}= grap
 //dummy data
 
 var books=[
-  {name:'C By Dennis Ritchie',genre:'Programming',id:'1'},
-  {name:'C++ By Bala Guruswamy',genre:'Programming',id:'2'},
-  {name:'Data Structures and Algorithms',genre:'Programming',id:'3'}
+  {name:'C By Dennis Ritchie',genre:'Programming',id:'1',authorId:'1'},
+  {name:'C++ By Bala Guruswamy',genre:'Programming',id:'2',authorId:'2'},
+  {name:'Data Structures and Algorithms',genre:'Programming',id:'3',authorId:'1'}
 
 
 ];
@@ -34,7 +34,20 @@ const BookType=new GraphQLObjectType({ //define the book type( object)
   fields:()=>({
     id:{type:GraphQLID},
     name:{type:GraphQLString},
-    genre:{type:GraphQLString}
+    genre:{type:GraphQLString},
+    author:{type:AuthorType,
+      //looking at actual data and return what is needed
+      //when graphql recieves author query inside the book then this funtion tells qraphql which author corresponds to this book
+      //parent data is useful in nested queries
+      resolve(parent,args){
+        console.log(parent);
+          return _.find(authors,{id:parent.authorId});
+
+
+      }
+
+
+         }
 
     })
 
@@ -46,10 +59,18 @@ const AuthorType=new GraphQLObjectType({
   name:'Author',
   fields:()=>({
     id:{type:GraphQLID},
-    name:{
-      type:GraphQLString
-    },
-    age:{type:GraphQLInt}
+    name:{type:GraphQLString},
+    age:{type:GraphQLInt},
+    book:{
+      type:BookType,
+      resolve(parent,args){
+        console.log(parent);
+        return _.find(books,{authorId:parent.id});
+
+      }
+
+
+    }
   })
 });
 //how we initially jump into the graph and we can have different root queries
@@ -57,7 +78,7 @@ const RootQuery=new GraphQLObjectType({
   name:'RootQueryType',
     fields:{
       //when we try to query from the front end-- using this paramter only we will call
-      book:{ // query for 1 book
+      book:{   // query for 1 book
         type:BookType, //type of data being queried
         //when we get the query for one book, args says that we expect some parameter with that query which is id of type GraphQLString
         args:{id:{type:GraphQLID}},
