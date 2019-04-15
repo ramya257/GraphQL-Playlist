@@ -1,10 +1,16 @@
 const graphql= require('graphql');
 const _=require('lodash');
+
+//importing the Book schema
+const Book=require('../models/book')
+const Author=require('../models/author');
+
+
 //this scehma witll define the type of data in the graph..ie object types, the relation between those object
 //types and how to reach data in the graph
 
 //We can grab the properties or functions inside one package using--
-const {GraphQLObjectType,GraphQLString,GraphQLSchema,GraphQLID,GraphQLInt}= graphql;
+const {GraphQLObjectType,GraphQLString,GraphQLSchema,GraphQLID,GraphQLInt,GraphQLList,GraphQLNonNull}= graphql;
 
 
 //dummy data
@@ -40,8 +46,11 @@ const BookType=new GraphQLObjectType({ //define the book type( object)
       //when graphql recieves author query inside the book then this funtion tells qraphql which author corresponds to this book
       //parent data is useful in nested queries
       resolve(parent,args){
-        console.log(parent);
-          return _.find(authors,{id:parent.authorId});
+
+          //return _.find(authors,{id:parent.authorId});
+
+//one book can have one author associated to it so we can use findById-- it returns only 0 or 1 record
+          return Author.findById(parent.authorId);
 
 
       }
@@ -62,10 +71,12 @@ const AuthorType=new GraphQLObjectType({
     name:{type:GraphQLString},
     age:{type:GraphQLInt},
     book:{
-      type:BookType,
+      type:new GraphQLList(BookType),// each author may have multiple book so we need list
       resolve(parent,args){
-        console.log(parent);
-        return _.find(books,{authorId:parent.id});
+        //return _.filter(books,{authorId:parent.id});// filter returns multiple results
+
+        //one author may be associated to multiple books so we have to use
+        return Book.find({authorId:parent.id});//find method will return the books for the author based on some criteria
 
       }
 
@@ -84,7 +95,8 @@ const RootQuery=new GraphQLObjectType({
         args:{id:{type:GraphQLID}},
         //write code inside this resolve to get the data from the DB or other source, it is fired when we receive the query
         resolve(parent,args){
-          return  _.find(books,{id:args.id}); //finding the book by id in array books
+          //return  _.find(books,{id:args.id}); //finding the book by id in array books
+          return Book.findById(args.id);
         }
 
 
@@ -94,18 +106,77 @@ const RootQuery=new GraphQLObjectType({
 
         args:{id:{type:GraphQLID}},
         resolve(parent,args){
-          console.log("Reached Author");
-          return _.find(authors,{id:args.id});
+
+          //return _.find(authors,{id:args.id});
+          return Author.findById(args.id);
+        }
+
+      },
+      books:{
+        type:new GraphQLList(BookType), //return all the records in Book collection
+        resolve(parent,args){
+        return Book.find({});
+        }
+      },
+      authors:{
+        type:new GraphQLList(AuthorType),  //return all the records in Author collection
+        resolve(parent,args){
+          //  return authors;
+          return Author.find({});
         }
 
       }
     }
 });
 
+//creating mutations
 
+const Mutation=new GraphQLObjectType({
+  name:'Mutation',
+  fields:{
+
+    addAuthor:{
+      type:AuthorType,
+      args:{
+        name:{type:GraphQLString},
+        age:{type:GraphQLInt},
+      },
+      resolve(parent,args){
+        let author=new Author({
+          name:args.name,
+          age:args.age
+        }); //creating local variable and it will have some properties
+
+        return author.save(); //moongose returns the data we want to receieve after the document is created
+      }
+
+    },
+    addBook:{
+      type:BookType,
+      args:{name:{type:new GraphQLNonNull(GraphQLString)},
+      genre:{type:new GraphQLNonNull(GraphQLString)},
+      authorId:{type:GraphQLID}
+    },
+    resolve(parent,args){
+      let book=new Book({
+        name:args.name,
+        genre:args.genre,
+        authorId:args.authorId
+
+
+      });
+
+      return book.save();
+
+    }
+
+    }
+  }
+});
 
 
 module.exports=new GraphQLSchema({
   //adding queries which allow the user to use these in the front-end( exporting the queries)
-  query:RootQuery
+  query:RootQuery,
+  mutation:Mutation
 });

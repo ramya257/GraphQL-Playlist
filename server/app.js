@@ -1,7 +1,17 @@
 const express=require('express');
+const mongoose=require('mongoose');
 const graphQlHTTP=require('express-graphql');
 const app=express();
 const schema= require('./schema/schema');
+
+//connecting to db
+mongoose.connect('mongodb://localhost/books_db', { useNewUrlParser: true });
+
+//checking the connection and once it is open, we fire a callback funtion
+mongoose.connection.once('open',()=>{
+  console.log("connection is open now");
+});
+
 
 // whenever a request comes to express app it tranfers it to graphQlHTTP module.
 app.use('/graphql',graphQlHTTP({
