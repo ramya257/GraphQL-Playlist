@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import {gql} from 'apollo-boost';
 
 class BookList extends Component {
   render() {
