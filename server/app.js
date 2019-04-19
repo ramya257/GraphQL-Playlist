@@ -3,6 +3,10 @@ const mongoose=require('mongoose');
 const graphQlHTTP=require('express-graphql');
 const app=express();
 const schema= require('./schema/schema');
+const cors=require('cors')
+
+//allow cross origin requests
+app.use(cors());
 
 //connecting to db
 mongoose.connect('mongodb://localhost/books_db', { useNewUrlParser: true });
