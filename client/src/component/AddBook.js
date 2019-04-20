@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {graphql,compose} from 'react-apollo';
-import {getAuthorsQuery,addBookMutation} from '../query/queries';
+import {getAuthorsQuery,addBookMutation,getBooksQuery} from '../query/queries';
 
 //declaring query
 
@@ -35,8 +35,12 @@ submitForm(e){
       name:this.state.name,
       genre:this.state.genre,
       authorId:this.state.authorId
-    }
+    },
+    refetchQueries:[{query:getBooksQuery}]
   });
+
+
+
 
 }
 
@@ -48,17 +52,17 @@ render(){
 
     <div className="field">
     <label>Book Name:</label>
-    <input type="text" onChange={(e)=>this.setState({name:e.target.value})}/>
+    <input type="text" id="bookName" onChange={(e)=>this.setState({name:e.target.value})}/>
     </div>
 
     <div className="field">
     <label>Genre:</label>
-    <input type="text" onChange={(e)=>this.setState({genre:e.target.value})}/>
+    <input type="text" id="genre" onChange={(e)=>this.setState({genre:e.target.value})}/>
     </div>
 
     <div className="field">
     <label>Author:</label>
-    <select onChange={(e)=>this.setState({authorId:e.target.value})}>
+    <select id="authorSelect" onChange={(e)=>this.setState({authorId:e.target.value})}>
     <option>Select Author</option>
     {this.displayAuthors()}
     </select>
