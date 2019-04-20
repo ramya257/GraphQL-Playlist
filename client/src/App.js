@@ -8,12 +8,13 @@ import {ApolloProvider} from 'react-apollo';
 //components
 
 import BookList from './component/BookList';
+import AddBook from './component/AddBook';
 
 const client= new ApolloClient({
   uri:'http://localhost:4000/graphql' // path from where we will make the requests to Apollo from this end point
 })
 
-
+//Root component
 class App extends Component {
   render() {
     return (
@@ -23,6 +24,7 @@ class App extends Component {
       <div id="main">
       <h1> Ramya's Reading list</h1>
       <BookList/>
+      <AddBook/>
       </div>
       </ApolloProvider>
     );
