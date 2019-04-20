@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import {graphql} from 'react-apollo';
-import {getAuthorsQuery} from '../query/queries';
+import {graphql,compose} from 'react-apollo';
+import {getAuthorsQuery,addBookMutation} from '../query/queries';
 
 //declaring query
 
@@ -16,7 +16,8 @@ class AddBook extends Component{
     };
   }
 displayAuthors(){
-  var data=this.props.data;
+  var data=this.props.getAuthorsQuery;
+
   if(data.loading){
     return(<option disabled>Loading Authors...</option>);
   }else{
@@ -29,7 +30,14 @@ displayAuthors(){
 //this refers to the component
 submitForm(e){
   e.preventDefault();
-  console.log(this.state);
+  this.props.addBookMutation({
+    variables:{
+      name:this.state.name,
+      genre:this.state.genre,
+      authorId:this.state.authorId
+    }
+  });
+
 }
 
 //The target event property returns the element that triggered the event
@@ -60,11 +68,14 @@ render(){
 
 
 
-  )
+  );
 }
 
 
 }
 
 
-export default graphql(getAuthorsQuery)(AddBook);
+export default compose(
+    graphql(getAuthorsQuery,{name:"getAuthorsQuery"}),
+    graphql(addBookMutation,{name:"addBookMutation"})
+)(AddBook);
