@@ -1,15 +1,8 @@
 import React, { Component } from 'react';
-import {gql} from 'apollo-boost';
 import {graphql} from 'react-apollo';
-
+import {getBooksQuery} from '../query/queries';
 //declaring query
-const getBooksQuery=gql`{
-  books{
-    name
-    id
-  }
-}
-`
+
 //react compont is loaded at first so one props object contains loading:true as at this point of time we dont receive anuthing from server, query is still loading
 //after we receieved data from the server using the query we binded it to the BookList component so now loading:false and inside data we have the list of all the data
 //component
@@ -34,7 +27,7 @@ class BookList extends Component {
     }
   }
   render() {
-    
+
     return (
 
       <div>
